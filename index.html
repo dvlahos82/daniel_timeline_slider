@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <link rel="stylesheet" href="./resources/ol.css">
+        <link rel="stylesheet" href="resources/fontawesome-all.min.css">
+        <link href="resources/photon-geocoder-autocomplete.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="./resources/ol-layerswitcher.css">
+        <link rel="stylesheet" href="./resources/qgis2web.css">
+        <style>
+        html, body {
+            background-color: #bbbbbb;
+        }
+        .ol-control > * {
+            background-color: #f8f8f8!important;
+            color: #444444!important;
+            border-radius: 0px;
+        }
+        .ol-attribution a, .gcd-gl-input::placeholder, .search-layer-input-search::placeholder {
+            color: #444444!important;
+        }
+        .search-layer-input-search {
+            background-color: #f8f8f8!important;
+        }
+        .ol-control > *:focus, .ol-control >*:hover {
+            background-color: rgba(248, 248, 248, 0.7)!important;
+        } 
+        .ol-control {
+            background-color: rgba(255,255,255,.4) !important;
+            padding: 2px !important;
+        } 
+        </style>
+
+        <style>
+        html, body, #map {
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            margin: 0;
+        }
+        </style>
+        <title>Daniel flood</title>
+    </head>
+    <body>
+        <div id="map">
+            <div id="popup" class="ol-popup">
+                <a href="#" id="popup-closer" class="ol-popup-closer"></a>
+                <div id="popup-content"></div>
+            </div>
+        </div>
+        <script src="resources/qgis2web_expressions.js"></script>
+        <script src="./resources/functions.js"></script>
+        <script src="./resources/ol.js"></script>
+        <script src="./resources/ol-layerswitcher.js"></script>
+        <script src="resources/photon-geocoder-autocomplete.min.js"></script>
+        <script src="layers/floods_20240522_1.js"></script><script src="layers/flooded_20230922_2.js"></script><script src="layers/flood_cop_20230919_3.js"></script><script src="layers/flood_cop_20230917_4.js"></script><script src="layers/flood_cop_20230914_5.js"></script><script src="layers/flood_cop_20230912_6.js"></script><script src="layers/flood_cop_20230910_7.js"></script>
+        <script src="styles/floods_20240522_1_style.js"></script><script src="styles/flooded_20230922_2_style.js"></script><script src="styles/flood_cop_20230919_3_style.js"></script><script src="styles/flood_cop_20230917_4_style.js"></script><script src="styles/flood_cop_20230914_5_style.js"></script><script src="styles/flood_cop_20230912_6_style.js"></script><script src="styles/flood_cop_20230910_7_style.js"></script>
+        <script src="./layers/layers.js" type="text/javascript"></script> 
+        <script src="./resources/Autolinker.min.js"></script>
+        <script src="./resources/qgis2web.js"></script>   
+        
+             <!-- 1. The Slider UI Panel -->
+<div id="time-slider-container" style="position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 1000; background: white; padding: 12px 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); width: 350px;">
+  <label for="daySlider" style="font-family: sans-serif; font-size: 14px; display: block; margin-bottom: 6px;">
+    <strong>Flood Date:</strong> <span id="dateLabel" style="color: #0078A8;">Loading...</span>
+  </label>
+  <input type="range" id="daySlider" min="0" max="6" value="0" step="1" style="width: 100%; cursor: pointer;">
+</div>
+
+<!-- 2. The Slider Logic Script -->
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  // Chronological mapping using qgis2web's "lyr_" variable naming convention
+  const timeSeries = [
+    { date: "2023-09-10", varName: "lyr_flood_cop_20230910_7" },
+    { date: "2023-09-12", varName: "lyr_flood_cop_20230912_6" },
+    { date: "2023-09-14", varName: "lyr_flood_cop_20230914_5" },
+    { date: "2023-09-17", varName: "lyr_flood_cop_20230917_4" },
+    { date: "2023-09-19", varName: "lyr_flood_cop_20230919_3" },
+    { date: "2023-09-22", varName: "lyr_flooded_20230922_2" },
+    { date: "2024-05-22", varName: "lyr_floods_20240522_1" }
+  ];
+
+  const slider = document.getElementById('daySlider');
+  const dateLabel = document.getElementById('dateLabel');
+
+  slider.min = 0;
+  slider.max = timeSeries.length - 1;
+  slider.value = 0;
+
+  function updateSliderLayers(selectedIndex) {
+    timeSeries.forEach((item, index) => {
+      const layerObj = window[item.varName];
+      if (layerObj) {
+        // Show/hide using OpenLayers native method
+        layerObj.setVisible(index === selectedIndex);
+      } else {
+        console.warn("Layer object not found in window scope:", item.varName);
+      }
+    });
+
+    dateLabel.innerText = timeSeries[selectedIndex].date;
+  }
+
+  // Small delay ensures qgis2web has finished instantiating all layer objects
+  setTimeout(() => {
+    updateSliderLayers(0);
+  }, 600);
+
+  // Listen for slider scrubbing
+  slider.addEventListener('input', (e) => {
+    const activeIndex = parseInt(e.target.value, 10);
+    updateSliderLayers(activeIndex);
+  });
+});
+</script>     
+    </body>
+</html>
